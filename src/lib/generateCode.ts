@@ -37,7 +37,7 @@ export function generatePlaywrightTest(steps: Step[]): string {
     const testStepVar = step.saveResponseAs || `data${idx + 1}`;
 
     // build the final URL string
-    let finalUrl = step.url.startsWith('http') 
+    const finalUrl = step.url.startsWith('http') 
       ? `\`${step.url}\`` 
       : `\`\${baseUrl}${step.url.startsWith('/') ? step.url : '/' + step.url}\``;
 

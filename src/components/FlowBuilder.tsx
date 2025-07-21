@@ -12,6 +12,7 @@ import {
   Edge,
   Node,
   BackgroundVariant,
+  MarkerType,
 } from 'reactflow';
 import 'reactflow/dist/style.css';
 
@@ -80,7 +81,7 @@ const initialEdges: Edge[] = [
       strokeWidth: 2,
     },
     markerEnd: {
-      type: 'arrowclosed',
+      type: MarkerType.ArrowClosed,
       color: '#3b82f6',
     },
   },
@@ -102,14 +103,14 @@ export default function FlowBuilder({ onUpdate }: FlowBuilderProps) {
         strokeWidth: 2,
       },
       markerEnd: {
-        type: 'arrowclosed',
+        type: MarkerType.ArrowClosed,
         color: '#3b82f6',
       },
     };
     setEdges((eds) => addEdge(newEdge, eds));
   }, [setEdges]);
 
-  const handleNodeDataChange = useCallback((nodeId: string, newData: Partial<any>) => {
+  const handleNodeDataChange = useCallback((nodeId: string, newData: Partial<Node['data']>) => {
     setNodes((nds) =>
       nds.map((node) =>
         node.id === nodeId
@@ -181,22 +182,22 @@ export default function FlowBuilder({ onUpdate }: FlowBuilderProps) {
     }
 
     // Calculate position to the right of the rightmost node
-    let newPosition = position;
     let rightmostNode = null;
+    let newPosition: { x: number; y: number };
     
-    if (!position) {
-      if (nodes.length > 0) {
-        // Find the rightmost node
-        rightmostNode = nodes.reduce((rightmost, node) => 
-          node.position.x > rightmost.position.x ? node : rightmost
-        );
-        newPosition = { 
-          x: rightmostNode.position.x + 450, // Space between nodes (400px node width + 50px gap)
-          y: 200 // Keep consistent Y position
-        };
-      } else {
-        newPosition = { x: 100, y: 200 };
-      }
+    if (position) {
+      newPosition = position;
+    } else if (nodes.length > 0) {
+      // Find the rightmost node
+      rightmostNode = nodes.reduce((rightmost, node) => 
+        node.position.x > rightmost.position.x ? node : rightmost
+      );
+      newPosition = { 
+        x: rightmostNode.position.x + 450, // Space between nodes (400px node width + 50px gap)
+        y: 200 // Keep consistent Y position
+      };
+    } else {
+      newPosition = { x: 100, y: 200 };
     }
 
     const newNodeId = `${nodes.length + 1}`;
@@ -232,13 +233,13 @@ export default function FlowBuilder({ onUpdate }: FlowBuilderProps) {
           strokeWidth: 2,
         },
         markerEnd: {
-          type: 'arrowclosed',
+          type: MarkerType.ArrowClosed,
           color: '#3b82f6',
         },
       };
       setEdges((eds) => [...eds, newEdge]);
     }
-  }, [nodes.length, handleNodeDataChange, handleNodeDelete, setNodes, setEdges]);
+  }, [nodes, handleNodeDataChange, handleNodeDelete, setNodes, setEdges]);
 
   const onNodeClick = useCallback((_: React.MouseEvent, node: Node) => {
     setSelectedNode(node.id);
