@@ -1,103 +1,89 @@
-import Image from "next/image";
+'use client';
+
+import React, { useState } from 'react';
+import FlowBuilder from '@/components/FlowBuilder';
+import CodeViewer from '@/components/CodeViewer';
+import ResizablePanel from '@/components/ResizablePanel';
+import { generatePlaywrightTest, Step } from '@/lib/generateCode';
 
 export default function Home() {
-  return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm/6 text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-[family-name:var(--font-geist-mono)] font-semibold">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+  const [generatedCode, setGeneratedCode] = useState('');
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+  // This function is called whenever the user updates the steps in DragDrop
+  const handleStepsUpdate = (steps: Step[]) => {
+    const code = generatePlaywrightTest(steps);
+    setGeneratedCode(code);
+  };
+
+  return (
+    <main className="h-screen w-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900">
+      {/* Header */}
+      <header className="bg-gray-800/80 backdrop-blur-sm border-b border-gray-700 px-6 py-4">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-bold text-white">Playwright API Flow Builder</h1>
+            <p className="text-gray-400 text-sm">Visual flow builder for creating Playwright API tests</p>
+          </div>
+          <div className="flex items-center space-x-4">
+            <div className="px-3 py-1 bg-green-900/50 text-green-300 rounded-full text-sm border border-green-700">
+              <span className="w-2 h-2 bg-green-400 rounded-full inline-block mr-2"></span>
+              Ready
+            </div>
+            <button className="bg-gradient-to-r from-green-500 to-blue-600 text-white px-4 py-2 rounded-lg hover:from-green-600 hover:to-blue-700 transition-all font-medium flex items-center space-x-2">
+              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M10 12L8 10l1.5-1.5L10 9l.5.5L12 8l-2 2 2 2-1.5 1.5L10 12z"/>
+                <path fillRule="evenodd" d="M4 4a2 2 0 00-2 2v8a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2H4zm12 2v8H4V6h12z" clipRule="evenodd"/>
+              </svg>
+              <span>Run on Checkly</span>
+            </button>
+          </div>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
+      </header>
+
+      <div className="h-[calc(100vh-80px)] flex">
+        {/* Left: Flow Builder */}
+        <section className="flex-1 min-w-0">
+          <FlowBuilder onUpdate={handleStepsUpdate} />
+        </section>
+
+        {/* Right: Resizable Code Preview */}
+        <ResizablePanel 
+          defaultWidth={700}
+          minWidth={320}
+          maxWidth={800}
+          className="bg-gray-800/50 backdrop-blur-sm flex flex-col"
         >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
+          <div className="p-4 border-b border-gray-700">
+            <div className="flex items-center justify-between">
+              <h2 className="font-semibold text-white flex items-center">
+                <span className="w-2 h-2 bg-blue-400 rounded-full mr-3 animate-pulse"></span>
+                Generated Test Code
+              </h2>
+              <div className="flex items-center space-x-2">
+                <button
+                  onClick={() => navigator.clipboard.writeText(generatedCode)}
+                  className="px-2 py-1 text-xs bg-gray-700 hover:bg-gray-600 text-gray-300 rounded transition-colors"
+                  title="Copy code to clipboard"
+                >
+                  Copy
+                </button>
+                <button
+                  className="px-2 py-1 text-xs bg-blue-600 hover:bg-blue-700 text-white rounded transition-colors"
+                  title="Download test file"
+                >
+                  Download
+                </button>
+              </div>
+            </div>
+            <p className="text-xs text-gray-400 mt-1">
+              {generatedCode.split('\n').length} lines • Auto-updated
+            </p>
+          </div>
+          <div className="flex-1 min-h-0">
+            <CodeViewer code={generatedCode} />
+          </div>
+        </ResizablePanel>
+      </div>
+    </main>
   );
 }
