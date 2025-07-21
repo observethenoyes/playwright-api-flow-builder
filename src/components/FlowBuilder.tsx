@@ -109,7 +109,7 @@ export default function FlowBuilder({ onUpdate }: FlowBuilderProps) {
     setEdges((eds) => addEdge(newEdge, eds));
   }, [setEdges]);
 
-  const handleNodeDataChange = useCallback((nodeId: string, newData: Partial<any>) => {
+  const handleNodeDataChange = useCallback((nodeId: string, newData: Partial<Node['data']>) => {
     setNodes((nds) =>
       nds.map((node) =>
         node.id === nodeId
@@ -238,7 +238,7 @@ export default function FlowBuilder({ onUpdate }: FlowBuilderProps) {
       };
       setEdges((eds) => [...eds, newEdge]);
     }
-  }, [nodes.length, handleNodeDataChange, handleNodeDelete, setNodes, setEdges]);
+  }, [nodes, handleNodeDataChange, handleNodeDelete, setNodes, setEdges]);
 
   const onNodeClick = useCallback((_: React.MouseEvent, node: Node) => {
     setSelectedNode(node.id);

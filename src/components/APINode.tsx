@@ -41,7 +41,7 @@ export default function APINode({ data, id }: NodeProps<APINodeData>) {
     }
   }, [data.isSelected, isExpanded]);
 
-  const handleChange = (field: string, value: any) => {
+  const handleChange = (field: string, value: string | boolean | Record<string, string>) => {
     data.onChange(id, { [field]: value });
   };
 
