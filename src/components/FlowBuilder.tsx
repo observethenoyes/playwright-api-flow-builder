@@ -12,6 +12,7 @@ import {
   Edge,
   Node,
   BackgroundVariant,
+  MarkerType,
 } from 'reactflow';
 import 'reactflow/dist/style.css';
 
@@ -80,7 +81,7 @@ const initialEdges: Edge[] = [
       strokeWidth: 2,
     },
     markerEnd: {
-      type: 'arrowclosed',
+      type: MarkerType.ArrowClosed,
       color: '#3b82f6',
     },
   },
@@ -102,7 +103,7 @@ export default function FlowBuilder({ onUpdate }: FlowBuilderProps) {
         strokeWidth: 2,
       },
       markerEnd: {
-        type: 'arrowclosed',
+        type: MarkerType.ArrowClosed,
         color: '#3b82f6',
       },
     };
@@ -232,7 +233,7 @@ export default function FlowBuilder({ onUpdate }: FlowBuilderProps) {
           strokeWidth: 2,
         },
         markerEnd: {
-          type: 'arrowclosed',
+          type: MarkerType.ArrowClosed,
           color: '#3b82f6',
         },
       };
