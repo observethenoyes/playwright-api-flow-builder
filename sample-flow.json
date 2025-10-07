@@ -1,0 +1,43 @@
+[
+  {
+    "method": "POST",
+    "url": "/api/auth/login",
+    "expectStatusOk": true,
+    "expectArrayNotEmpty": false,
+    "saveResponseAs": "authToken",
+    "requestBody": "{\n  \"username\": \"testuser\",\n  \"password\": \"password123\"\n}",
+    "headers": {
+      "Content-Type": "application/json",
+      "Accept": "application/json",
+      "User-Agent": "Playwright-API-Test",
+      "X-Client-Version": "1.0.0"
+    },
+    "baseUrl": "https://api.myapp.com"
+  },
+  {
+    "method": "GET",
+    "url": "/api/user/profile",
+    "expectStatusOk": true,
+    "expectArrayNotEmpty": false,
+    "saveResponseAs": "userProfile",
+    "requestBody": "",
+    "headers": {
+      "Authorization": "Bearer ${authToken.token}",
+      "Accept": "application/json",
+      "Cache-Control": "no-cache"
+    }
+  },
+  {
+    "method": "GET",
+    "url": "/api/orders?userId=${userProfile.id}",
+    "expectStatusOk": true,
+    "expectArrayNotEmpty": true,
+    "saveResponseAs": "userOrders",
+    "requestBody": "",
+    "headers": {
+      "Authorization": "Bearer ${authToken.token}",
+      "Accept": "application/json",
+      "X-Request-ID": "orders-fetch-${userProfile.id}"
+    }
+  }
+]

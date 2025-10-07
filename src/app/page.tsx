@@ -1,18 +1,83 @@
 'use client';
 
-import React, { useState } from 'react';
-import FlowBuilder from '@/components/FlowBuilder';
+import React, { useState, useRef } from 'react';
+import FlowBuilder, { FlowBuilderRef } from '@/components/FlowBuilder';
 import CodeViewer from '@/components/CodeViewer';
 import ResizablePanel from '@/components/ResizablePanel';
+import ImportModal from '@/components/ImportModal';
 import { generatePlaywrightTest, Step } from '@/lib/generateCode';
+import { parsePlaywrightTest } from '@/lib/parsePlaywrightTest';
 
 export default function Home() {
   const [generatedCode, setGeneratedCode] = useState('');
+  const flowBuilderRef = useRef<FlowBuilderRef>(null);
+  const [isImportModalOpen, setIsImportModalOpen] = useState(false);
 
   // This function is called whenever the user updates the steps in DragDrop
   const handleStepsUpdate = (steps: Step[]) => {
     const code = generatePlaywrightTest(steps);
     setGeneratedCode(code);
+  };
+
+  const handleImportClick = () => {
+    setIsImportModalOpen(true);
+  };
+
+  const handleTextImport = (content: string) => {
+    try {
+      let importedSteps: Step[] = [];
+
+      // Try to detect if it's JSON or Playwright test code
+      const trimmedContent = content.trim();
+      console.log('Import content type detection:', { 
+        isJSON: trimmedContent.startsWith('[') && trimmedContent.endsWith(']'),
+        hasTest: trimmedContent.includes('test(') || trimmedContent.includes('test.step('),
+        contentLength: trimmedContent.length 
+      });
+      
+      if (trimmedContent.startsWith('[') && trimmedContent.endsWith(']')) {
+        // Looks like JSON array
+        importedSteps = JSON.parse(content);
+        console.log('Parsed JSON steps:', importedSteps);
+        
+        if (!Array.isArray(importedSteps)) {
+          throw new Error('JSON content must be an array of steps');
+        }
+      } else if (trimmedContent.includes('test(') || trimmedContent.includes('test.step(')) {
+        // Looks like Playwright test code
+        importedSteps = parsePlaywrightTest(content);
+        console.log('Parsed Playwright steps:', importedSteps);
+        
+        if (importedSteps.length === 0) {
+          throw new Error('No API calls found in the provided test code');
+        }
+      } else {
+        throw new Error('Content does not appear to be valid Playwright test code or JSON');
+      }
+
+      // Basic validation of step structure
+      for (const step of importedSteps) {
+        if (!step.method || !step.url) {
+          console.error('Invalid step:', step);
+          throw new Error('Each step must have a method and url');
+        }
+      }
+
+      console.log('About to import steps:', importedSteps);
+      console.log('FlowBuilder ref current:', flowBuilderRef.current);
+
+      // Import the steps into the flow builder
+      if (flowBuilderRef.current) {
+        flowBuilderRef.current.importSteps(importedSteps);
+        console.log('Import steps called successfully');
+      } else {
+        console.error('FlowBuilder ref is null!');
+      }
+    } catch (error) {
+      console.error('Import error:', error);
+      alert(`Import failed: ${error instanceof Error ? error.message : 'Invalid content format'}`);
+      throw error; // Re-throw so modal can handle it
+    }
   };
 
   return (
@@ -29,12 +94,14 @@ export default function Home() {
               <span className="w-2 h-2 bg-green-400 rounded-full inline-block mr-2"></span>
               Ready
             </div>
-            <button className="bg-gradient-to-r from-green-500 to-blue-600 text-white px-4 py-2 rounded-lg hover:from-green-600 hover:to-blue-700 transition-all font-medium flex items-center space-x-2">
-              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                <path d="M10 12L8 10l1.5-1.5L10 9l.5.5L12 8l-2 2 2 2-1.5 1.5L10 12z"/>
-                <path fillRule="evenodd" d="M4 4a2 2 0 00-2 2v8a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2H4zm12 2v8H4V6h12z" clipRule="evenodd"/>
+            <button 
+              onClick={handleImportClick}
+              className="bg-gradient-to-r from-purple-500 to-pink-600 text-white px-4 py-2 rounded-lg hover:from-purple-600 hover:to-pink-700 transition-all font-medium flex items-center space-x-2"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10" />
               </svg>
-              <span>Run on Checkly</span>
+              <span>Import Flow</span>
             </button>
           </div>
         </div>
@@ -43,7 +110,7 @@ export default function Home() {
       <div className="h-[calc(100vh-80px)] flex">
         {/* Left: Flow Builder */}
         <section className="flex-1 min-w-0">
-          <FlowBuilder onUpdate={handleStepsUpdate} />
+          <FlowBuilder onUpdate={handleStepsUpdate} ref={flowBuilderRef} />
         </section>
 
         {/* Right: Resizable Code Preview */}
@@ -84,6 +151,13 @@ export default function Home() {
           </div>
         </ResizablePanel>
       </div>
+
+      {/* Import Modal */}
+      <ImportModal 
+        isOpen={isImportModalOpen}
+        onClose={() => setIsImportModalOpen(false)}
+        onImport={handleTextImport}
+      />
     </main>
   );
 }

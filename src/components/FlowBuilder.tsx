@@ -1,8 +1,7 @@
 'use client';
 
-import React, { useCallback, useEffect, useState } from 'react';
-import {
-  ReactFlow,
+import React, { useCallback, useEffect, useState, forwardRef, useImperativeHandle } from 'react';
+import ReactFlow, {
   Controls,
   Background,
   useNodesState,
@@ -28,11 +27,15 @@ interface FlowBuilderProps {
   onUpdate: (steps: Step[]) => void;
 }
 
+export interface FlowBuilderRef {
+  importSteps: (steps: Step[]) => void;
+}
+
 const initialNodes: Node[] = [
   {
     id: '1',
     type: 'apiNode',
-    position: { x: 100, y: 200 },
+    position: { x: 150, y: 250 },
     data: {
       method: 'POST',
       url: '/oauth/token',
@@ -51,7 +54,7 @@ const initialNodes: Node[] = [
   {
     id: '2',
     type: 'apiNode',
-    position: { x: 500, y: 200 },
+    position: { x: 650, y: 250 },
     data: {
       method: 'GET',
       url: '/users',
@@ -87,7 +90,7 @@ const initialEdges: Edge[] = [
   },
 ];
 
-export default function FlowBuilder({ onUpdate }: FlowBuilderProps) {
+const FlowBuilder = forwardRef<FlowBuilderRef, FlowBuilderProps>(({ onUpdate }, ref) => {
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
   const [selectedNode, setSelectedNode] = useState<string | null>(null);
@@ -193,7 +196,7 @@ export default function FlowBuilder({ onUpdate }: FlowBuilderProps) {
         node.position.x > rightmost.position.x ? node : rightmost
       );
       newPosition = { 
-        x: rightmostNode.position.x + 450, // Space between nodes (400px node width + 50px gap)
+        x: rightmostNode.position.x + 600, // Space between nodes (520px node width + 80px gap)
         y: 200 // Keep consistent Y position
       };
     } else {
@@ -259,6 +262,79 @@ export default function FlowBuilder({ onUpdate }: FlowBuilderProps) {
       .map(node => node.data.saveResponseAs)
       .filter((name): name is string => !!name && name.trim() !== '');
   }, [nodes]);
+
+  // Import steps function to convert Step[] to ReactFlow nodes
+  const importSteps = useCallback((steps: Step[]) => {
+    console.log('FlowBuilder importSteps called with:', steps);
+    
+    // Clear existing nodes and edges
+    setNodes([]);
+    setEdges([]);
+    
+    // Convert steps to nodes
+    const importedNodes: Node[] = steps.map((step, index) => {
+      console.log(`Converting step ${index}:`, step);
+      return {
+        id: `${index + 1}`,
+        type: 'apiNode',
+        position: { x: 100 + (index * 600), y: 200 }, // 600px spacing between nodes
+        data: {
+          method: step.method,
+          url: step.url,
+          expectStatusOk: step.expectStatusOk ?? true,
+          expectArrayNotEmpty: step.expectArrayNotEmpty ?? false,
+          saveResponseAs: step.saveResponseAs ?? '',
+          useVariableInUrl: {
+            varName: '',
+            propertyPath: ''
+          },
+          requestBody: step.requestBody ?? '',
+          headers: step.headers ?? {},
+          onChange: handleNodeDataChange,
+          onDelete: handleNodeDelete,
+        },
+      };
+    });
+    
+    console.log('Created imported nodes:', importedNodes);
+
+    // Create edges connecting nodes sequentially
+    const importedEdges: Edge[] = [];
+    for (let i = 0; i < importedNodes.length - 1; i++) {
+      importedEdges.push({
+        id: `e${i + 1}-${i + 2}`,
+        source: `${i + 1}`,
+        target: `${i + 2}`,
+        type: 'smoothstep',
+        animated: true,
+        style: {
+          stroke: '#3b82f6',
+          strokeWidth: 2,
+        },
+        markerEnd: {
+          type: MarkerType.ArrowClosed,
+          color: '#3b82f6',
+        },
+      });
+    }
+
+    // Set the imported nodes and edges
+    console.log('Setting nodes:', importedNodes);
+    console.log('Setting edges:', importedEdges);
+    setNodes(importedNodes);
+    setEdges(importedEdges);
+
+    // Update base URL if provided in the first step
+    if (steps.length > 0 && steps[0].baseUrl) {
+      console.log('Setting base URL:', steps[0].baseUrl);
+      setBaseUrl(steps[0].baseUrl);
+    }
+  }, [handleNodeDataChange, handleNodeDelete, setNodes, setEdges]);
+
+  // Expose importSteps function through ref
+  useImperativeHandle(ref, () => ({
+    importSteps,
+  }), [importSteps]);
 
   return (
     <div className="h-full w-full flex">
@@ -347,4 +423,8 @@ export default function FlowBuilder({ onUpdate }: FlowBuilderProps) {
       </div>
     </div>
   );
-}
+});
+
+FlowBuilder.displayName = 'FlowBuilder';
+
+export default FlowBuilder;
