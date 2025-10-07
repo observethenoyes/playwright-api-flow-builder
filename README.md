@@ -27,10 +27,12 @@ A visual, drag-and-drop interface for creating Playwright API tests. Build compl
 - **DELETE Requests**: Remove resources with proper error handling
 
 ### 💎 **Advanced Features**
+- **Import Flows**: Import existing Playwright tests or JSON flow definitions
 - **Variable Chaining**: Save response data and use it in subsequent requests
 - **Template Literals**: Use `${variable.property}` syntax in headers and bodies
 - **Smart Headers**: Auto-add Content-Type headers for POST/PUT requests
 - **Response Validation**: Built-in status and array validation options
+- **Enhanced Header Editor**: Dedicated key-value pair editor for headers
 
 ### 🎨 **Professional UI**
 - **Modern Design**: Clean, dark theme with smooth animations
@@ -76,11 +78,16 @@ Configure your API base URL in the header (e.g., `https://api.example.com`)
 - Nodes automatically connect in sequence
 - Configure each request with URLs, headers, and payloads
 
-### 3. **Chain Requests**
+### 3. **Import Existing Tests** (Optional)
+- Click "Import Flow" button in the header
+- Paste existing Playwright test code or JSON flow definition
+- Flows are automatically converted to visual nodes
+
+### 4. **Chain Requests**
 - Save response data using the "Save Response As" field
 - Reference saved data in later requests with `${variableName.property}`
 
-### 4. **Generate & Export**
+### 5. **Generate & Export**
 - View generated Playwright code in the right panel
 - Copy to clipboard or export the test file
 - Run tests with standard Playwright commands

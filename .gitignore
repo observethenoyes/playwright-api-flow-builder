@@ -59,4 +59,4 @@ Thumbs.db
 .eslintcache
 
 # Claude/AI settings (keeping local settings only)
-.claude/settings.local.json
+.claude/
