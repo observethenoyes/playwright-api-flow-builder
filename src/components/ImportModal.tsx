@@ -25,7 +25,7 @@ export default function ImportModal({ isOpen, onClose, onImport }: ImportModalPr
       onImport(content);
       setContent('');
       onClose();
-    } catch (error) {
+    } catch {
       // Error handling is done in parent component
     } finally {
       setIsProcessing(false);

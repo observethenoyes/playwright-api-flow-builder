@@ -102,7 +102,7 @@ function parseStepData(method: string, fullUrl: string, optionsBlock: string, st
       const headerMatch = line.match(/["']([^"']+)["']\s*:\s*(?:`([^`]*)`|["']([^"']*)["'])/);
       if (headerMatch) {
         const key = headerMatch[1];
-        let value = headerMatch[2] || headerMatch[3] || '';
+        const value = headerMatch[2] || headerMatch[3] || '';
         console.log('Parsed header:', { key, value });
         headers[key] = value;
       }
@@ -121,7 +121,7 @@ function parseStepData(method: string, fullUrl: string, optionsBlock: string, st
         const parsed = eval('(' + dataMatch[1] + ')'); // Using eval to handle object literals
         requestBody = JSON.stringify(parsed, null, 2);
         console.log('Parsed request body:', requestBody);
-      } catch (error) {
+      } catch {
         // If parsing fails, use as-is
         requestBody = dataMatch[1];
         console.log('Failed to parse request body, using as-is:', requestBody);

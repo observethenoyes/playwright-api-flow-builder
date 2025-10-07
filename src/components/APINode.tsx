@@ -35,7 +35,7 @@ const methodColors = {
   DELETE: 'from-red-500 to-red-600',
 };
 
-interface NodeProps<T = any> {
+interface NodeProps<T = unknown> {
   id: string;
   data: T;
   selected?: boolean;
